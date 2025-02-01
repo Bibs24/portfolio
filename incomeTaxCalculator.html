@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Income Tax Calculator 2025-26</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+
+        input[type="number"] {
+            width: 95%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            background: #333;
+            color: #fff;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #6200ea;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .result {
+            margin-top: 20px;
+            background: #292929;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 15px;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Income Tax Calculator 2025-26</h2>
+        <input type="number" id="salary" placeholder="Enter your annual salary">
+        <button onclick="calculateTax()">Calculate Tax</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function calculateTax() {
+    // Get user input and validate it
+    const baseSalary = parseFloat(document.getElementById('salary').value);
+
+    if (isNaN(baseSalary) || baseSalary < 0) {
+        document.getElementById('result').innerHTML = "<p>Please enter a valid positive salary amount.</p>";
+        return;
+    }
+
+    const standardDeduction = 75000;
+    const professionalTax = 200 * 12; // ₹2400 per year
+    const totalDeductions = standardDeduction + professionalTax;
+
+    // Prevent negative taxable income
+    let taxableIncome = Math.max(0, baseSalary - totalDeductions);
+
+    // Calculate PF deductions
+    const pfAnnual = (baseSalary * 0.4 * 0.12); // 12% of 40% of base salary
+    const pfMonthly = pfAnnual / 12;
+
+    let tax = 0;
+
+    // Tax Slabs
+    if (taxableIncome <= 1200000) {
+        tax = 0;
+    } else if (taxableIncome <= 1600000) {
+        tax = 120000;
+    } else if (taxableIncome <= 2000000) {
+        tax = 200000;
+    } else if (taxableIncome <= 2400000) {
+        tax = 300000;
+    } else if (taxableIncome <= 5000000) {
+        tax = 1080000;
+    } else {
+        tax = 1080000 + ((taxableIncome - 5000000) * 0.3);
+    }
+
+    // Ensure tax does not exceed total earnings
+    tax = Math.min(tax, baseSalary);
+
+    // Calculate final salary after tax and deductions
+    const netAnnualSalary = Math.max(0, baseSalary - tax - pfAnnual - professionalTax);
+    const monthlySalary = netAnnualSalary / 12;
+
+    // Display results
+    document.getElementById('result').innerHTML = `
+        <p>Annual Tax: ₹${tax.toLocaleString()}</p>
+        <p>Monthly Salary After Tax & PF: ₹${monthlySalary.toFixed(2)}</p>
+        <p>Monthly PF Deduction: ₹${pfMonthly.toFixed(2)}</p>
+    `;
+
+    
+}
+document.getElementById("salary").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            calculateTax();  // Trigger function on Enter key press
+        }
+    });
+
+    document.getElementById("salary").addEventListener("blur", function() {
+        calculateTax();  // Trigger function when leaving the input field (Tab or click outside)
+    });
+
+    </script>
+</body>
+</html>

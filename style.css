@@ -5,6 +5,9 @@
 body{
     background: #070707;
 }
+.img-box {
+    cursor: pointer; /* Indicates it's clickable */
+}
 .hero{
     height: 10vh;
     width:100%;
@@ -101,5 +104,25 @@ span{
 }
 .social-links a:hover{
     color: #ff4321;
+}
+.click-text{
+    position: absolute;
+    top: 70%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 30px;
+    font-weight: 700;
+    display: block;
+    z-index: 10;
+    white-space: normal;
+    width: 50px; /* Adjust the width as needed */
+    text-align: center;
+    width: 100%;
+    transition: transform 1s, color 1s;
+}
+.img-box:hover .click-text {
+    transform: translate(-50%, -45%);
+    color: black;
 }
 
