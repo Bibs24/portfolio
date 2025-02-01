@@ -73,6 +73,10 @@
         <input type="number" id="salary" placeholder="Enter your annual salary">
         <button onclick="calculateTax()">Calculate Tax</button>
         <div class="result" id="result"></div>
+        <div id="tax-image">
+            <img id="image12Lac" src="12lac.png" style="padding-left: 80px; display: none; max-width: 200px; margin-top: 10px;">
+            <img id="image13Lac" src="131415Lacs.png" style="padding-left: 80px; display: none; max-width: 200px; margin-top: 10px;">
+        </div>
     </div>
 
     <script>
@@ -80,55 +84,84 @@
     // Get user input and validate it
     const baseSalary = parseFloat(document.getElementById('salary').value);
 
-    if (isNaN(baseSalary) || baseSalary < 0) {
-        document.getElementById('result').innerHTML = "<p>Please enter a valid positive salary amount.</p>";
-        return;
-    }
+if (isNaN(baseSalary) || baseSalary < 0) {
+    document.getElementById('result').innerHTML = "<p>Please enter a valid positive salary amount.</p>";
+    document.getElementById('image12Lac').style.display = "none";
+    document.getElementById('image13Lac').style.display = "none";
+    return;
+}
 
-    const standardDeduction = 75000;
-    const professionalTax = 200 * 12; // ₹2400 per year
-    const totalDeductions = standardDeduction + professionalTax;
+const standardDeduction = 75000;
+const professionalTax = 200 * 12; // ₹2400 per year
+const totalDeductions = standardDeduction + professionalTax;
 
-    // Prevent negative taxable income
-    let taxableIncome = Math.max(0, baseSalary - totalDeductions);
+// Prevent negative taxable income
+let taxableIncome = Math.max(0, baseSalary - totalDeductions);
 
-    // Calculate PF deductions
-    const pfAnnual = (baseSalary * 0.4 * 0.12); // 12% of 40% of base salary
-    const pfMonthly = pfAnnual / 12;
+// Calculate PF deductions
+const pfAnnual = (baseSalary * 0.4 * 0.12); // 12% of 40% of base salary
+const pfMonthly = pfAnnual / 12;
 
-    let tax = 0;
+// Define tax slabs dynamically (in lakhs)
+const taxSlabs = [
+    { limit: 400000, rate: 0 },   // 0 - 4L → 0%
+    { limit: 800000, rate: 0.05 }, // 4L - 8L → 5%
+    { limit: 1200000, rate: 0.10 }, // 8L - 12L → 10%
+    { limit: 1600000, rate: 0.15 }, // 12L - 16L → 15%
+    { limit: 2000000, rate: 0.20 }, // 16L - 20L → 20%
+    { limit: 2400000, rate: 0.25 }, // 20L - 24L → 25%
+    { limit: Infinity, rate: 0.30 }  // Above 25L → 30%
+];
 
-    // Tax Slabs
-    if (taxableIncome <= 1200000) {
-        tax = 0;
-    } else if (taxableIncome <= 1600000) {
-        tax = 120000;
-    } else if (taxableIncome <= 2000000) {
-        tax = 200000;
-    } else if (taxableIncome <= 2400000) {
-        tax = 300000;
-    } else if (taxableIncome <= 5000000) {
-        tax = 1080000;
+// Calculate tax dynamically
+let tax = 0;
+let previousLimit = 0;
+
+for (const slab of taxSlabs) {
+    if (taxableIncome > previousLimit) {
+        const taxableAmount = Math.min(taxableIncome, slab.limit) - previousLimit;
+        tax += taxableAmount * slab.rate;
+        previousLimit = slab.limit;
     } else {
-        tax = 1080000 + ((taxableIncome - 5000000) * 0.3);
+        break;
     }
+}
 
-    // Ensure tax does not exceed total earnings
-    tax = Math.min(tax, baseSalary);
+if (tax > 0) {
+    if (baseSalary <= 800000) {
+        tax -= 20000; // Rebate for 8L
+    } else if (baseSalary <= 900000) {
+        tax -= 30000; // Rebate for 9L
+    } else if (baseSalary <= 1000000) {
+        tax -= 40000; // Rebate for 10L
+    } else if (baseSalary <= 1100000) {
+        tax -= 50000; // Rebate for 11L
+    } else if (baseSalary <= 1275000) {
+        tax -= 60000; // Rebate for 12L
+    }
+}
+tax = Math.max(0, tax);
+// Ensure tax does not exceed total earnings
+tax = Math.min(tax, baseSalary);
 
-    // Calculate final salary after tax and deductions
-    const netAnnualSalary = Math.max(0, baseSalary - tax - pfAnnual - professionalTax);
-    const monthlySalary = netAnnualSalary / 12;
+// Calculate final salary after tax and deductions
+const netAnnualSalary = Math.max(0, baseSalary - tax - pfAnnual - professionalTax);
+const monthlySalary = netAnnualSalary / 12;
+    let show12LacImage = tax == 0;
 
+    // Show or hide images based on condition
+    document.getElementById('image12Lac').style.display = show12LacImage ? "block" : "none";
+    document.getElementById('image13Lac').style.display = show12LacImage ? "none" : "block";
+    // Ensure tax does not go below zero after rebate
     // Display results
     document.getElementById('result').innerHTML = `
-        <p>Annual Tax: ₹${tax.toLocaleString()}</p>
+        <p>Annual Tax: ₹${tax}</p>
         <p>Monthly Salary After Tax & PF: ₹${monthlySalary.toFixed(2)}</p>
         <p>Monthly PF Deduction: ₹${pfMonthly.toFixed(2)}</p>
     `;
-
     
 }
+
 document.getElementById("salary").addEventListener("keypress", function(event) {
         if (event.key === "Enter") {
             calculateTax();  // Trigger function on Enter key press
